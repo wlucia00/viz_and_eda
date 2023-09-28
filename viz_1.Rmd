@@ -10,3 +10,49 @@ library(tidyverse)
 library(ggridges)
 ```
 
+## Using NOAA weather data from the internet
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Molokai_HI",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) |>
+  select(name, id, everything())
+
+weather_df
+```
+
+## Basic scatterplot
+first put in dataset, then the aesthetic mappings, then the geometries
+```{r}
+ggplot(weather_df, aes(x=tmin, y=tmax)) +
+  geom_point()
+```
+`geom_point()` puts a dot for each datapoint (scatterplot)
+
+you can also use pipe to make the graphs. same graph - but helpful if you want to add more functions like filter, select, mutate, other data manip steps etc
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax)) +
+  geom_point()
+```
+
+if you want to save an object/print it, name the plot
+```{r}
+ggp_weather = 
+  weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) 
+
+ggp_weather + geom_point()
+```
+## advanced plots
+
