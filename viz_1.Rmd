@@ -1,0 +1,12 @@
+---
+title: "Visualization with ggplot 1"
+author: "Lucia Wang"
+date: "2023-09-28"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(ggridges)
+```
+
