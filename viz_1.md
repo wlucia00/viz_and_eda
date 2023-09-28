@@ -3,6 +3,8 @@ Visualization with ggplot 1
 Lucia Wang
 2023-09-28
 
+(knitr will do your settings for figures)
+
 ``` r
 library(tidyverse)
 ```
@@ -20,6 +22,12 @@ library(tidyverse)
 
 ``` r
 library(ggridges)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
 ```
 
 ## Using NOAA weather data from the internet
@@ -90,8 +98,8 @@ ggplot(weather_df, aes(x=tmin, y=tmax)) +
 
     ## Warning: Removed 17 rows containing missing values (`geom_point()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-3-1.png)<!-- --> `geom_point()`
-puts a dot for each datapoint (scatterplot)
+<img src="viz_1_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
+`geom_point()` puts a dot for each datapoint (scatterplot)
 
 you can also use pipe to make the graphs. same graph - but helpful if
 you want to add more functions like filter, select, mutate, other data
@@ -105,7 +113,7 @@ weather_df |>
 
     ## Warning: Removed 17 rows containing missing values (`geom_point()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
 
 if you want to save an object/print it, name the plot
 
@@ -119,8 +127,8 @@ ggp_weather + geom_point()
 
     ## Warning: Removed 17 rows containing missing values (`geom_point()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> \## advanced
-plots
+<img src="viz_1_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+\## advanced plots
 
 add color to names and smooth lines thru each group.
 
@@ -141,7 +149,7 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
 
     ## Warning: Removed 17 rows containing missing values (`geom_point()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
 
 now add facets (panels). `.` substitutes for col, then put `~` then row
 vars
@@ -160,7 +168,7 @@ weather_df |>
 
     ## Warning: Removed 17 rows containing missing values (`geom_point()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
 
 lets try a different plot. using precipitation as the size of points
 
@@ -178,7 +186,7 @@ weather_df |>
 
     ## Warning: Removed 19 rows containing missing values (`geom_point()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
 
 if assigning a specific color… careful where you put it in the aes
 
@@ -191,7 +199,7 @@ ggplot(weather_df, aes(x = tmax, y = tmin)) +
 
     ## Warning: Removed 17 rows containing non-finite values (`stat_binhex()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
 
 line plot (connects the dots)
 
@@ -202,7 +210,7 @@ weather_df |>
   geom_line() 
 ```
 
-![](viz_1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
 
 ## univariate
 
@@ -219,7 +227,7 @@ ggplot(weather_df, aes(x=tmax)) +
 
     ## Warning: Removed 17 rows containing non-finite values (`stat_bin()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
 
 or a density plot.. `adjust=` is to smooth ?
 
@@ -230,7 +238,7 @@ ggplot(weather_df, aes(x=tmax, fill=name)) +
 
     ## Warning: Removed 17 rows containing non-finite values (`stat_density()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
 
 boxplots
 
@@ -241,7 +249,7 @@ ggplot(weather_df, aes(x=name, y=tmax)) +
 
     ## Warning: Removed 17 rows containing non-finite values (`stat_boxplot()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-13-1.png" width="90%" />
 
 violin plots (density plot + vertical + mirrored)
 
@@ -252,7 +260,7 @@ ggplot(weather_df, aes(x=name, y=tmax)) +
 
     ## Warning: Removed 17 rows containing non-finite values (`stat_ydensity()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-14-1.png" width="90%" />
 
 ridge plot (like violin + density? helpful if lots of categories and
 shape of distribution matters)
@@ -267,4 +275,22 @@ ggplot(weather_df, aes(x=tmax, y=name)) +
     ## Warning: Removed 17 rows containing non-finite values
     ## (`stat_density_ridges()`).
 
-![](viz_1_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+<img src="viz_1_files/figure-gfm/unnamed-chunk-15-1.png" width="90%" />
+
+## save a plot
+
+make a folder in your directory then use `ggsave()`
+
+``` r
+ggweather = 
+  ggplot(weather_df, aes(x=tmax, y=name)) +
+  geom_density_ridges(scale=.85)
+
+ggsave("results/ggweather.pdf", ggweather)
+```
+
+    ## Saving 6 x 3.59 in image
+    ## Picking joint bandwidth of 1.54
+
+    ## Warning: Removed 17 rows containing non-finite values
+    ## (`stat_density_ridges()`).

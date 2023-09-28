@@ -5,9 +5,16 @@ date: "2023-09-28"
 output: github_document
 ---
 
+(knitr will do your settings for figures)
 ```{r}
 library(tidyverse)
 library(ggridges)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
 ```
 
 ## Using NOAA weather data from the internet
@@ -139,4 +146,13 @@ ggplot(weather_df, aes(x=tmax, y=name)) +
 
 ## save a plot
 make a folder in your directory then use `ggsave()`
+```{r}
+ggweather = 
+  ggplot(weather_df, aes(x=tmax, y=name)) +
+  geom_density_ridges(scale=.85)
+
+ggsave("results/ggweather.pdf", ggweather)
+
+```
+
 
