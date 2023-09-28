@@ -121,3 +121,150 @@ ggp_weather + geom_point()
 
 ![](viz_1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> \## advanced
 plots
+
+add color to names and smooth lines thru each group.
+
+where you define the aesthetic matters because if you put `color=` in a
+different place it puts that there instead.
+
+`alpha` = opacity
+
+``` r
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha=.3) +
+  geom_smooth(se=FALSE)
+```
+
+    ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_smooth()`).
+
+    ## Warning: Removed 17 rows containing missing values (`geom_point()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+now add facets (panels). `.` substitutes for col, then put `~` then row
+vars
+
+``` r
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=.3) +
+  geom_smooth(se=FALSE) +
+  facet_grid(. ~ name)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_smooth()`).
+
+    ## Warning: Removed 17 rows containing missing values (`geom_point()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+lets try a different plot. using precipitation as the size of points
+
+``` r
+weather_df |>
+  ggplot(aes(x=date, y=tmax, color=name)) +
+  geom_point(aes(size= prcp),alpha=.3) +
+  geom_smooth() +
+  facet_grid(. ~ name)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_smooth()`).
+
+    ## Warning: Removed 19 rows containing missing values (`geom_point()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+if assigning a specific color… careful where you put it in the aes
+
+some fun options - `geom_hex()` for density
+
+``` r
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_hex()
+```
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_binhex()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+line plot (connects the dots)
+
+``` r
+weather_df |>
+  filter(name == "USW00022534") |>
+  ggplot(aes(x=date, y=tmax)) +
+  geom_line() 
+```
+
+![](viz_1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+## univariate
+
+same thought process: dataframe, which var maps onto what, what
+geometry. lets make a histogram… (use `dodge=` to put the groups
+separate on the same plot - but maybe not best)
+
+``` r
+ggplot(weather_df, aes(x=tmax)) +
+  geom_histogram()
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_bin()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+or a density plot.. `adjust=` is to smooth ?
+
+``` r
+ggplot(weather_df, aes(x=tmax, fill=name)) +
+  geom_density(alpha=0.3, adjust=.75)
+```
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_density()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+boxplots
+
+``` r
+ggplot(weather_df, aes(x=name, y=tmax)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_boxplot()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+violin plots (density plot + vertical + mirrored)
+
+``` r
+ggplot(weather_df, aes(x=name, y=tmax)) +
+  geom_violin()
+```
+
+    ## Warning: Removed 17 rows containing non-finite values (`stat_ydensity()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+ridge plot (like violin + density? helpful if lots of categories and
+shape of distribution matters)
+
+``` r
+ggplot(weather_df, aes(x=tmax, y=name)) +
+  geom_density_ridges(scale=.85)
+```
+
+    ## Picking joint bandwidth of 1.54
+
+    ## Warning: Removed 17 rows containing non-finite values
+    ## (`stat_density_ridges()`).
+
+![](viz_1_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->

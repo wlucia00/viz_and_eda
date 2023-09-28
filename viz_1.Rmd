@@ -56,3 +56,87 @@ ggp_weather + geom_point()
 ```
 ## advanced plots
 
+add color to names and smooth lines thru each group. 
+
+where you define the aesthetic matters because if you put `color=` in a different place it puts that there instead.
+
+`alpha` = opacity
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha=.3) +
+  geom_smooth(se=FALSE)
+```
+
+now add facets (panels). 
+`.` substitutes for col, then put `~` then row vars
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=.3) +
+  geom_smooth(se=FALSE) +
+  facet_grid(. ~ name)
+```
+
+lets try a different plot. using precipitation as the size of points
+```{r}
+weather_df |>
+  ggplot(aes(x=date, y=tmax, color=name)) +
+  geom_point(aes(size= prcp),alpha=.3) +
+  geom_smooth() +
+  facet_grid(. ~ name)
+```
+
+if assigning a specific color... careful where you put it in the aes
+
+some fun options - `geom_hex()` for density 
+```{r}
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_hex()
+```
+
+line plot (connects the dots)
+```{r}
+weather_df |>
+  filter(name == "USW00022534") |>
+  ggplot(aes(x=date, y=tmax)) +
+  geom_line() 
+```
+
+
+## univariate
+same thought process: dataframe, which var maps onto what, what geometry. 
+lets make a histogram...
+(use `dodge=` to put the groups separate on the same plot - but maybe not best)
+```{r}
+ggplot(weather_df, aes(x=tmax)) +
+  geom_histogram()
+```
+
+or a density plot..
+`adjust=` is to smooth ?
+```{r}
+ggplot(weather_df, aes(x=tmax, fill=name)) +
+  geom_density(alpha=0.3, adjust=.75)
+```
+
+boxplots
+```{r}
+ggplot(weather_df, aes(x=name, y=tmax)) +
+  geom_boxplot()
+```
+
+violin plots (density plot + vertical + mirrored)
+```{r}
+ggplot(weather_df, aes(x=name, y=tmax)) +
+  geom_violin()
+```
+
+ridge plot (like violin + density? helpful if lots of categories and shape of distribution matters)
+```{r}
+ggplot(weather_df, aes(x=tmax, y=name)) +
+  geom_density_ridges(scale=.85)
+```
+
+## save a plot
+make a folder in your directory then use `ggsave()`
+
