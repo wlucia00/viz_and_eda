@@ -4,3 +4,83 @@ author: "Lucia Wang (lw3061)"
 date: "2023-10-03"
 output: github_document
 ---
+
+```{r}
+library(tidyverse)
+library(patchwork)
+```
+
+import data as before
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USW00022534 = "Molokai_HI",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) |>
+  select(name, id, everything())
+```
+
+start plotting
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=.5) +
+  labs(
+    title = "Temperature plot",
+    x= "Min daily temp (degs C)",
+    y= "Max daily temp (degs C)",
+    color = "Location",
+    caption = "Max vs min daily temp in 3 locations; data from RNOAA"
+  )
+```
+use `labs` for labels. can label a variety of different aesthetics, can even name the legends or give titles/captions.
+
+various scales
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=.5) +
+  labs(
+    title = "Temperature plot",
+    x= "Min daily temp (degs C)",
+    y= "Max daily temp (degs C)",
+    color = "Location",
+    caption = "Max vs min daily temp in 3 locations; data from RNOAA"
+  ) +
+  scale_x_continuous(
+    breaks = c(-15,0,15),
+    labels = c("-15 C", "0", "15")
+  ) +
+  scale_y_continuous(
+    position = "right",
+    trans = "sqrt",
+    # limits = c(0,10)
+  )
+```
+change stuff on the axes with `scale_x_continuous` and `scale_y_continuous`. can also move axes around with `position`, or transform them with `trans`. you can `filter` data before the plot or during the plot with `limits`.
+
+what about the colors?
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=.5) +
+  labs(
+    title = "Temperature plot",
+    x= "Min daily temp (degs C)",
+    y= "Max daily temp (degs C)",
+    color = "Location",
+    caption = "Max vs min daily temp in 3 locations; data from RNOAA"
+  ) +
+  viridis:: scale_color_viridis(discrete= TRUE)
+```
+`hue` for a range of colors...
+or `viridis` palette - works for most people !
