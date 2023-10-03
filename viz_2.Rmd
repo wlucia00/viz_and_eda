@@ -1,0 +1,6 @@
+---
+title: "Viz_2"
+author: "Lucia Wang (lw3061)"
+date: "2023-10-03"
+output: github_document
+---
