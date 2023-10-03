@@ -8,9 +8,26 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(patchwork)
+
+# formatting/setting plots
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
-import data as before
+### plots!
 ```{r}
 weather_df = 
   rnoaa::meteo_pull_monitors(
@@ -68,7 +85,7 @@ weather_df |>
 ```
 change stuff on the axes with `scale_x_continuous` and `scale_y_continuous`. can also move axes around with `position`, or transform them with `trans`. you can `filter` data before the plot or during the plot with `limits`.
 
-what about the colors?
+### what about the colors?
 ```{r}
 weather_df |>
   ggplot(aes(x=tmin, y=tmax, color=name)) +
@@ -84,3 +101,101 @@ weather_df |>
 ```
 `hue` for a range of colors...
 or `viridis` palette - works for most people !
+
+### what about themes?
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=.5) +
+  labs(
+    title = "Temperature plot",
+    x= "Min daily temp (degs C)",
+    y= "Max daily temp (degs C)",
+    color = "Location",
+    caption = "Max vs min daily temp in 3 locations; data from RNOAA"
+  ) +
+  viridis:: scale_color_viridis(discrete= TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+themes are more for the chart itself. you can remove legends with `="none"`, reset colors, make the plots look like they came from SAS, excel, etc... just make sure theme() at the bottom if you are changing stuff before (?). see the first code chunk for setting options. 
+
+### data arguments
+```{r}
+weather_df |>
+  ggplot(aes(x=date, y=tmax)) +
+  geom_point(aes(color=name)) +
+  geom_smooth()
+```
+
+sometimes easier to separate data into separate dfs for plotting.
+```{r}
+central_park_df = 
+  weather_df |> 
+  filter(name == "CentralPark_NY")
+
+molokai_df = 
+  weather_df |> 
+  filter(name == "Molokai_HI")
+
+ggplot(data = molokai_df, aes(x = date, y = tmax, color = name)) + 
+  geom_point() + 
+  geom_line(data = central_park_df)
+```
+
+### patchwork
+faceting things can work well to make same plot in diff panels 
+```{r}
+weather_df |>
+  ggplot(aes(x=date, y=tmax, color=name)) +
+  geom_point() +
+  facet_grid(. ~ name)
+```
+
+but there is also... `patchwork` package.
+```{r}
+ggp_temp_scatter = 
+  weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha=0.5) +
+  theme(legend.position="none")
+
+ggp_prcp_density =
+  weather_df |>
+  filter(prcp > 25) |>
+  ggplot(aes(x=prcp, fill=name)) +
+  geom_density(alpha=0.5) +
+  theme(legend.position="none")
+
+tmax_date_p = 
+  weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  theme(legend.position = "bottom")
+
+(ggp_temp_scatter + ggp_prcp_density) / tmax_date_p
+```
+you can put ggplot items together with `patchwork`.
+
+### manip
+most times, problems w ggplot are problems w tidying.
+
+factor variables = categorical variables with order. you can change the order of a factor. 
+character variables are just characters. if you need to put it in a plot, `ggplot` will convert it to factor variable in alphabetical order. if you want a different order, you need to manipulate it on your own
+```{r}
+weather_df |>
+  mutate(
+    name = fct_relevel(name, c("Molokai_HI", "CentralPark_NY", "Waterhole_WA"))
+  ) |>
+  ggplot(aes(x=name, y=tmax)) +
+  geom_boxplot()
+
+weather_df |>
+  mutate(
+    name = fct_reorder(name, tmax)
+  ) |>
+  ggplot(aes(x=name, y=tmax, fill=name)) +
+  geom_violin()
+```
+`fct_relevel()` to reorder names, ``fct_reorder()` to sort by other variable
