@@ -1,7 +1,124 @@
 ---
-title: "Viz 3"
-author: "Lucia Wang"
+title: "Viz 3/EDA"
+author: "Lucia Wang (lw3061)"
 date: "2023-10-05"
 output: github_document
 ---
+
+```{r}
+library(tidyverse)
+```
+
+import data as before, add month variable
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USW00022534 = "Molokai_HI",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10,
+    month = lubridate::floor_date(date, unit = "month")) |>
+  select(name, id, everything())
+```
+
+## initial numeric work
+```{r}
+weather_df |>
+  ggplot(aes(x=prcp)) +
+  geom_histogram()
+```
+pretty skewed distribution, but some really big outliers.
+```{r}
+weather_df |>
+  filter(prcp > 1000)
+```
+3 obs bigger than 1000.
+
+```{r}
+weather_df |>
+  filter(tmax >= 20, tmax <= 30) |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point()
+```
+banded structure - why? recorded in F, converted to C, rounded? Waterhole is recording it differently which is why its distribution looks different
+
+## grouping
+```{r}
+weather_df |>
+  group_by(name, month)
+```
+seems invisible (doesn't add columns), but shows that its grouped/how many groups there are in the message. (like sorting). it looks the same, but the df knows its grouped
+
+## counting
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(n_obs = n())
+```
+`summarize()` works over each group - makes new df with only groups and vars you want
+
+```{r}
+weather_df |> 
+  count(name, month)
+```
+not a readable df but does similar to summarize with n
+
+```{r}
+weather_df |>
+  count(name, month) |>
+  pivot_wider(
+    names_from = name,
+    values_from = n
+  )
+```
+a bit more readable! had to purposely "un"tidy it
+
+## general summaries
+```{r}
+weather_df |>
+  group_by(name) |>
+  summarize(
+    mean_tmax = mean(tmax)
+  )
+```
+missing values! can solve with `drop_na(tmax)`, or within the actual function with `na.rm=`
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(
+    mean_tmax = mean(tmax, na.rm=TRUE),
+    median_tmax = median(tmax, na.rm=TRUE),
+    sd_tmax = sd(tmax, na.rm=TRUE)
+  )
+```
+and plot!
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(mean_tmax = mean(tmax, na.rm=TRUE)) |>
+  ggplot(aes(x=month, y=mean_tmax, color= name)) +
+  geom_point() +
+  geom_line()
+```
+
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(mean_tmax = mean(tmax, na.rm=TRUE)) |>
+  pivot_wider(
+    names_from = name,
+    values_from = mean_tmax
+  ) |>
+  knitr::kable()
+```
+`knitr` package, `kable` function formats it for you in the md file into an actual table!
+
 
