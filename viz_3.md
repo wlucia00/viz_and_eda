@@ -310,3 +310,75 @@ weather_df |>
 
 `knitr` package, `kable` function formats it for you in the md file into
 an actual table!
+
+## grouped mutate
+
+if you forgot you grouped your data… bad! anyways, can put functions
+together. note: `view()` to see the group mutate values
+
+``` r
+weather_df |>
+  group_by(name) |>
+  mutate(
+    mean_tmax = mean(tmax, na.rm=TRUE),
+    centered_tmax = tmax - mean_tmax
+  ) |>
+  ggplot(aes(x=date, y=centered_tmax, color=name)) + 
+  geom_point()
+```
+
+    ## Warning: Removed 17 rows containing missing values (`geom_point()`).
+
+![](viz_3_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+## window functions
+
+take in n, put out n. can rank stuff. `desc` for descending - code for
+max temperature ranking within month
+
+``` r
+weather_df |>
+  group_by(name, month) |>
+  mutate(tmax_rank = min_rank(desc(tmax))) 
+```
+
+    ## # A tibble: 2,190 × 8
+    ## # Groups:   name, month [72]
+    ##    name           id          date        prcp  tmax  tmin month      tmax_rank
+    ##    <chr>          <chr>       <date>     <dbl> <dbl> <dbl> <date>         <int>
+    ##  1 CentralPark_NY USW00094728 2021-01-01   157   4.4   0.6 2021-01-01        17
+    ##  2 CentralPark_NY USW00094728 2021-01-02    13  10.6   2.2 2021-01-01         1
+    ##  3 CentralPark_NY USW00094728 2021-01-03    56   3.3   1.1 2021-01-01        19
+    ##  4 CentralPark_NY USW00094728 2021-01-04     5   6.1   1.7 2021-01-01         9
+    ##  5 CentralPark_NY USW00094728 2021-01-05     0   5.6   2.2 2021-01-01        13
+    ##  6 CentralPark_NY USW00094728 2021-01-06     0   5     1.1 2021-01-01        14
+    ##  7 CentralPark_NY USW00094728 2021-01-07     0   5    -1   2021-01-01        14
+    ##  8 CentralPark_NY USW00094728 2021-01-08     0   2.8  -2.7 2021-01-01        20
+    ##  9 CentralPark_NY USW00094728 2021-01-09     0   2.8  -4.3 2021-01-01        20
+    ## 10 CentralPark_NY USW00094728 2021-01-10     0   5    -1.6 2021-01-01        14
+    ## # ℹ 2,180 more rows
+
+``` r
+# can then filter to find lowest temps
+  # |> filter(tmax_rank < 2)
+```
+
+lags often used to compare obs to previous value
+
+``` r
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax)) |>
+  summarize(
+    sd_temp_change = sd(temp_change, na.rm=TRUE)
+  )
+```
+
+    ## # A tibble: 3 × 2
+    ##   name           sd_temp_change
+    ##   <chr>                   <dbl>
+    ## 1 CentralPark_NY           4.43
+    ## 2 Molokai_HI               1.24
+    ## 3 Waterhole_WA             3.04
+
+this can show u variability of temp change

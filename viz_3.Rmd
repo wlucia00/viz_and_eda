@@ -121,4 +121,40 @@ weather_df |>
 ```
 `knitr` package, `kable` function formats it for you in the md file into an actual table!
 
+## grouped mutate
+if you forgot you grouped your data... bad!
+anyways, can put functions together. note: `view()` to see the group mutate values
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(
+    mean_tmax = mean(tmax, na.rm=TRUE),
+    centered_tmax = tmax - mean_tmax
+  ) |>
+  ggplot(aes(x=date, y=centered_tmax, color=name)) + 
+  geom_point()
+```
+
+## window functions
+take in n, put out n.
+can rank stuff. `desc` for descending - code for max temperature ranking within month
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  mutate(tmax_rank = min_rank(desc(tmax))) 
+# can then filter to find lowest temps
+  # |> filter(tmax_rank < 2)
+```
+
+lags often used to compare obs to previous value
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax)) |>
+  summarize(
+    sd_temp_change = sd(temp_change, na.rm=TRUE)
+  )
+```
+this can show u variability of temp change 
+
 
